@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GraphQL Mutation</title>
+</head>
+<body>
+
+
+  <input type="text" name="title" id="title-movie">
+  <input type="file" name="film">
+  <textarea type="text" id="movie-description"></textarea>
+  <button onclick="createFilme()">Create Filme</button>
+
+  <script>
+
+    let titleMovie = document.getElementById("title-movie").value;
+    let movieDescription= document.getElementById("title-movie").value;
+
+    function createFilme() {
+      const newTitle = titleMovie;
+      const newDescription = movieDescription;
+
+      // Make a GraphQL request using fetch or another method
+      fetch('https://api-us-east-1-shared-usea1-02.hygraph.com/v2/clqds0ql9bn4701rtg531426g/master', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: `
+            mutation CreateFilme($newTitle: String!, $newDescription: String!) {
+              createFilme(data: { titulo: $newTitle, descricao: $newDescription }) {
+                id
+                titulo
+                descricao
+              }
+            }
+          `,
+          variables: {
+            newTitle,
+            newDescription,
+          },
+        }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Movie created:', data.data.createFilme);
+        const result = data.data.createFilme;
+
+        console.log(result.id);
+
+        // Include the mutation for publishing inside the fetch response block
+        fetch('https://api-us-east-1-shared-usea1-02.hygraph.com/v2/clqds0ql9bn4701rtg531426g/master', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: `
+              mutation PublicarFilme($id: ID!) {
+                publishFilme(where: { id: $id }, to: PUBLISHED) {
+                  descricao
+                  id
+                  titulo
+                  video {
+                    url
+                  }
+                }
+              }
+            `,
+            variables: {
+              id: result.id,
+            },
+          }),
+        })
+        .then(response => response.json())
+        .then(publishData => {
+          console.log('Movie published:', publishData.data.publishFilme);
+        })
+        .catch(publishError => {
+          console.error('Error publishing movie:', publishError);
+        });
+      })
+      .catch(error => {
+        console.error('Error creating movie:', error);
+      });
+    }
+  </script>
+
+</body>
+</html>
