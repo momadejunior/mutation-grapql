@@ -1,1 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  
+
+
+
+<!--Buscar dados da API-->
+<script>
+  const url = 'https://api-us-east-1-shared-usea1-02.hygraph.com/v2/clsx9i67q0mac07uneq5zcr5x/master';
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `
+      query MarCarJogos {
+  jogos {
+    id
+    equipe01
+    equipe02
+    horaDoJogo
+    localDoJogo
+  }
+}
+`,
+    }),
+
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Jogos marked:', data.data.jogos);
+  })
+  .catch(error => {
+    console.error('Error fetching data:', error);
+  });
+</script>
+
+<!--Buscar dados da API apartir de um ID-->
+<script>
+  const IdDoJogo="clsxflqs53q8d07lejwmlpy5x";
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `
+      query encontrarOjogoPeloId($id:ID!) {
+  jogos(where: {id: $id}) {
+    id
+    equipe01
+    equipe02
+    horaDoJogo
+    localDoJogo
+    logoDaEquipe01 {
+      url
+      id
+    }
+    logoDaEquipe02 {
+      url
+      id
+    }
+  }
+}
+
+`,variables:{
+  id:IdDoJogo,
+},
+    }),
+
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Jogos marked:', data.data.jogos);
+  })
+  .catch(error => {
+    console.error('Error fetching data:', error);
+  });
+</script>
+
+<!--Adicionar conteudo-->
+<input id="title-movie">
+<input id="description">
+<button onclick="createJogo()">create</button>
+<button onclick="publicar()">publicar</button>
+<script>
+function createJogo() {
+  // Get values from input fields
+  let firstTeam = document.getElementById("title-movie").value;
+  let secondTeam = document.getElementById("description").value;
+
+  // Set constant values
+  const team01 = "FC TAU-TAU";
+  const team02 ="FC Strickers";
+  const time = "2015";
+  const location = "Brasília";
+
+  // Make a GraphQL request using fetch
+  fetch('https://api-us-east-1-shared-usea1-02.hygraph.com/v2/clsx9i67q0mac07uneq5zcr5x/master', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `
+        mutation AdicionarJogo($team01: String!, $team02: String!, $time: String!, $location: String!) {
+          createJogo(data: {equipe01:$team01, equipe02:$team02, horaDoJogo: $time, localDoJogo:$location}) {
+            equipe01
+            equipe02
+            horaDoJogo
+            localDoJogo
+            id
+          }
+        }
+      `,
+      variables: {
+        team01,
+        team02,
+        time,
+        location,
+      },
+    }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      // Handle the response data
+      console.log('jogo created:', data.data.createJogo);
+      const result = data.data.createJogo;
+      console.log(result.id);
+    })
+    .catch(error => {
+      // Handle errors
+      console.error('Error creating movie:', error);
+    });
+}
+
+</script>
+
+
+<!--Publicar-->
+
+<script>
+const mutation = `
+  mutation MyMutation {
+    publishJogo(where: {id: "clt5u7iem0baj07l91qntildf"}) {
+            equipe01
+            equipe02
+            horaDoJogo
+            localDoJogo
+            id
+    }
+  }
+`;
+
+fetch(url, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    // Add any other headers if required (e.g., authorization)
+  },
+  body: JSON.stringify({ query: mutation }),
+})
+  .then(response => response.json())
+  .then(data => {
+    // Handle the response data here
+    console.log(data);
+  })
+  .catch(error => {
+    // Handle errors here
+    console.error(error);
+  });
+  </script>
+<!--encontrar jogos pelo id-->
+
+<script>
+ 
+
+const mutationUpdate = `
+  mutation AtualizarJogo {
+    updateJogo(
+      data: {
+        equipe01: "Bayer Poeira FC",
+        equipe02: "Alvorecer FC",
+        horaDoJogo: "12:00",
+        localDoJogo: "Quisse Mavota"
+      }
+      where: {id: "clt5u7iem0baj07l91qntildf"}
+    ) {
+      equipe01
+      equipe02
+      horaDoJogo
+      id
+      localDoJogo
+    }
+  }
+`;
+
+fetch(url, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    // Add any other headers if required (e.g., authorization)
+  },
+  body: JSON.stringify({ query: mutationUpdate }),
+})
+  .then(response => response.json())
+  .then(data => {
+    // Handle the response data here
+    console.log(data);
+  })
+  .catch(error => {
+    // Handle errors here
+    console.error(error);
+  });
+
+</script>
+
+<!--pagar jogo-->
+<script>
+ 
+
+const ApagarJogo = `
+  mutation ApagarJogo {
+    deleteJogo(where: {id: "clsyhxijg00i607jxgj7j6j4x"}) {
+      equipe01
+      equipe02
+      horaDoJogo
+      id
+      localDoJogo
+    }
+  }
+`;
+
+fetch(url, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    // Add any other headers if required (e.g., authorization)
+  },
+  body: JSON.stringify({ query:ApagarJogo }),
+})
+  .then(response => response.json())
+  .then(data => {
+    // Handle the response data here
+    console.log(data);
+  })
+  .catch(error => {
+    // Handle errors here
+    console.error(error);
+  });
+
+</script>
+
+</body>
+</html>
+
+
 
