@@ -1,0 +1,115 @@
+
+
+<table id="gamesTable">
+  
+</table>
+
+
+<script>
+const url = 'https://api-us-east-1-shared-usea1-02.hygraph.com/v2/clsx9i67q0mac07uneq5zcr5x/master';
+const gameTable = document.getElementById('gamesTable');
+</script>
+
+
+<script>
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `
+      query Classification {
+        classificacaos {
+          derrotas
+          empates
+          id
+          nomeDaEquipa
+          pontos
+          vitorias
+        }
+      }
+      `,
+    }),
+  })
+    .then(response => response.json())
+    .then(result => {
+      // Handle the result of the query
+      console.log(result.data.classificacaos);
+  
+      // Order the array by points in descending order
+      const sortedData = result.data.classificacaos.sort((a, b) => b.pontos - a.pontos);
+  
+      // Assuming gameTable is an HTML element, you can update its content like this
+      gameTable.innerHTML = sortedData.map((game, index) => `
+        <tr>
+          <td>${index + 1}</td> <!-- Convert id to a number, starting from 1 -->
+          <td>${game.nomeDaEquipa}</td>
+          <td>${game.vitorias}</td>
+          <td>${game.empates}</td>
+          <td>${game.derrotas}</td>
+          <td>${game.pontos}</td>
+        </tr>
+      `).join('');
+    })
+    .catch(error => {
+      // Handle errors
+      console.error(error);
+    });
+  </script>
+
+
+
+  <script>
+function addClassification(){
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `
+      mutation addTotableClassification(
+  $loss: String!, 
+  $draw: String!, 
+  $name: String!, 
+  $points: String!, 
+  $victory: String!
+) {
+  createClassificacao(
+    data: {
+      derrotas: $loss,
+      empates: $draw,
+      nomeDaEquipa: $name,
+      pontos: $points,
+      vitorias: $victory
+    }
+  ) {
+    derrotas
+    empates
+    id
+    pontos
+    nomeDaEquipa
+    vitorias
+  }
+}
+      `,
+      variables: {
+  "loss": "2",
+  "draw": "1",
+  "name": "Momas FC",
+  "points": "10",
+  "victory": "5"
+},
+    }),
+  })
+    .then(response => response.json())
+    .then(result => {
+      // Handle the result of the query
+      console.log(result.data.createClassificacao);
+    })
+    .catch(error => {
+      // Handle errors
+      console.error(error);
+    });}
+</script>
